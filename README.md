@@ -7,4 +7,7 @@ awesome wm with lightdm
 read <a href="install">install</a>
 
 Screenshot
-![Alt text](screenshot.png?raw=true "Optional Title")
+![Alt text](screenshot.png?raw=true "ncmpcpp neofetch")
+
+Rofi run
+![Alt text](rofi.png?raw=true "rofi")
