@@ -146,8 +146,7 @@ umount -R /mnt
 swapoff -a
 reboot
 
-######## Setup system boot to new system. 
-#password for boot encrypt and system encrypt will prompt
+######## Setup system boot to new system ########
 #login as  userarch
 #connect to internet
 sudo wifi-menu
@@ -204,7 +203,17 @@ systemctl --user enable mpd.service
 sudo nano /etc/sudoers
 userarch archlinux =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot
 
+#enable tlp apparmor service
+sudo systemctl enable tlp.service
+sudo systemctl enable tlp-sleep.service
+sudo systemctl mask systemd-rfkill.service
+sudo systemctl mask systemd-rfkill.socket
+sudo systemctl enable apparmor.service
 
+#enable AppArmor as default security model on every boot set the following kernel parameters:
+nano /boot/loader/entries/arch.conf
+apparmor=1 security=apparmor
+ 
 #reboot
 sudo systemctl reboot
 
