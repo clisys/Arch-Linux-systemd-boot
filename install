@@ -195,6 +195,7 @@ sudo systemctl enable lightdm.service
 git clone https://github.com/localhostmacbook/Arch-Linux-systemd-boot.git
 cd Arch-Linux-systemd-boot
 mv .* ~/
+chmod +x screenshot && sudo mv screenshot /usr/local/bin
 
 #Enable mpd service
 systemctl --user enable mpd.service
