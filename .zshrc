@@ -47,6 +47,7 @@ alias path="tr ':' '\n' <<< "$PATH""
 alias task='ps aux | grep'
 alias musix='ncmpcpp --screen playlist'
 alias musixv='ncmpcpp --screen visualizer'
+alias dlmp3='youtube-dl --extract-audio --audio-format mp3'
 
 source $ZSH/oh-my-zsh.sh
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
