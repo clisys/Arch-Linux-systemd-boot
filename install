@@ -1,0 +1,217 @@
+Pre-installation
+
+#Verify signature
+gpg --keyserver pgp.mit.edu --keyserver-options auto-key-retrieve --verify archlinux-version-x86_64.iso.sig
+
+#BIOS and UEFI bootable USB
+wipefs --all /dev/sdx
+dd bs=4M if=path/to/archlinux.iso of=/dev/sdx status=progress oflag=sync
+
+#Boot to live environment
+#Set the keyboard layout
+loadkeys us
+
+#Verify the boot mode UEFI
+ls /sys/firmware/efi/efivars
+
+#Connect to the Internet
+wifi-menu
+ping -c 5 8.8.8.8
+
+#Update the system clock
+timedatectl set-ntp true
+timedatectl set-timezone Asia/Jakarta
+
+#layout partition disks :
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         1050623   512.0 MiB   EF00  EFI System
+   2         1050624       839911423   400.0 GiB   8300  Linux filesystem
+
+#Delete all partitions on disk this will delete all data on your hardisk be carefull
+
+gdisk /dev/sda
+o = blank gpt
+y = yes
+w = write
+
+#setup partition
+gdisk /dev/sda
+
+#EFI System
+n
+1
+2048
+1050623
+EF00
+
+#Linux filesystem
+n
+2
+1050624
+839911423
+8300
+w
+y
+
+#Encrypt System partition root and swap
+cryptsetup --user-random luksFormat --cipher aes-xts-plain64 -h sha512 -s 512 --type luks2 /dev/sda2
+cryptsetup open /dev/sda2 encrypt
+pvcreate /dev/mapper/encrypt
+vgcreate ArchLvm /dev/mapper/encrypt
+lvcreate -L +8G ArchLvm -n swap
+lvcreate -l +100%FREE ArchLvm -n root
+
+#Create filesystems for efi, boot, root and swap
+mkfs.vfat -F 32 /dev/sda1
+mkfs.ext4 /dev/ArchLvm/root
+mkswap /dev//ArchLvm/swap
+
+#Mount for install ArchLinux
+mount /dev/ArchLvm/root /mnt
+mkdir /mnt/boot
+mount /dev/sda1 /mnt/boot
+swapon /dev/ArchLvm/swap
+
+#install Arch linux system (i'm using laptop with broadcom wireless card and intel cpu)
+pacstrap /mnt base base-devel dialog wpa_supplicant zsh linux-headers broadcom-wl-dkms git wget reflector intel-ucode
+
+#generate partition table
+gefstab -U /mnt > /mnt/etc/fstab
+
+#enter chroot
+arch-chroot /mnt /bin/bash
+
+#Set time zone and sync clock
+ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+hwclock --systohc --utc
+
+#set locale
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+echo "LANG=en_us.UTF-8" > /etc/locale.conf
+locale-gen
+
+#set keymap
+echo "KEYMAP=us" > /etc/vconsole.conf
+
+#set hostname
+echo "archlinux" > /etc/hostname
+
+#set hosts
+echo "127.0.0.1	localhost::1\n127.0.0.1		localhost\n127.0.0.1	archlinux.localdomain	archilinux" > /etc/hosts
+
+#Set root Password
+passwd
+
+#create user with sudo access
+echo "\n%wheel ALL=(ALL) ALL\n" > /etc/sudoers
+useradd -m -g wheel -s /usr/bin/zsh userarch
+passwd userarch
+
+#set HOOKS initramfs
+nano /etc/mkinitcpio.conf
+HOOKS="base systemd udev autodetect keyboard sd-vconsole modconf block sd-encrypt sd-lvm2 filesystems fsck"
+
+#Generate initrd image:
+mkinitcpio -P
+
+#install Bootloader systemdboot
+bootctl install
+
+#add entries loader
+nano /boot/loader/entries/arch.conf
+title Arch Linux
+linux /vmlinuz-linux
+initrd /intel-ucode.img
+initrd /initramfs-linux.img
+options rd.luks.name=
+
+#exit save ctrl+x+y+enter
+#we need get UUID sda2 encrypt
+
+blkid -s UUID -o value /dev/sda2 encrypt >> /boot/loader/entries/arch.conf
+
+#edit entries loader
+nano /boot/loader/entries/arch.conf
+title Arch Linux
+linux /vmlinuz-linux
+initrd /intel-ucode.img
+initrd /initramfs-linux.img
+options rd.luks.name=xxxxxxxx-xxxxxxxx-xxxx-xxxxxxxxxxx=cryptlvm root=/dev/ArchLvm/root rw ipv6.disable=1 net.ifnames=0 biosdevname=0
+
+#exit save ctrl+x+y+enter
+
+#exit chroot
+exit
+umount -R /mnt
+swapoff -a
+reboot
+
+######## Setup system boot to new system. 
+#password for boot encrypt and system encrypt will prompt
+#login as  userarch
+#connect to internet
+sudo wifi-menu
+
+#if u forgot ssid profile
+ls /etc/netctl 
+
+#auto connect next boot
+sudo netctl enable wlan0-ssid
+sudo netctl start wlan0-ssid
+
+#speedup mirrorlist
+sudo reflector --score 100 --fastest 25 --sort rate --save /etc/pacman.d/mirrorlist --verbose
+
+#install yay
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+
+#install all my setup Awesome + lightdm 
+wget https://raw.githubusercontent.com/localhostmacbook/Arch-Linux-systemd-boot/master/pkglist.txt
+wget https://raw.githubusercontent.com/localhostmacbook/Arch-Linux-systemd-boot/master/aurpkglist.txt
+
+sudo pacman -S --needed $(comm -12 <(pacman -Slq|sort) <(sort pkglist.txt) )
+yay S --noedit --noconfirm --needed aurpkglist.txt
+
+#Setup lightdm for awesome xsessions
+sudo nano /etc/lightdm/lightdm.conf
+[LightDM]
+run-directory=/run/lightdm
+sessions-directory=/usr/share/xsessions
+
+[Seat:*]
+greeter-session=lightdm-mini-greeter
+greeter-allow-guest=false
+session-wrapper=/etc/lightdm/Xsession
+
+#add user to mini-greeter
+sudo nano /etc/lightdm/lightdm-mini-greeter.conf
+user = userarch
+
+#enable lightdm to next boot
+sudo systemctl enable lightdm.service
+
+#Dotfile Setup
+git clone https://github.com/localhostmacbook/Arch-Linux-systemd-boot.git
+cd Arch-Linux-systemd-boot
+mv .* ~/
+
+#Enable mpd service
+systemctl --user enable mpd.service
+
+#allow user to shutdown add alias to /etc/sudoers
+sudo nano /etc/sudoers
+userarch archlinux =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot
+
+
+#reboot
+sudo systemctl reboot
+
+#boot to Arch linux With lightdm and awesome wm
+#to download mp3
+open terminal Super+enter
+cd Music
+dlmp3 https://www.youtube.com/watch?v=Jpfevl5k7k4
+
+#All command Super+s
