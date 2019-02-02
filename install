@@ -64,7 +64,7 @@ lvcreate -l +100%FREE ArchLvm -n root
 #Create filesystems for efi, boot, root and swap
 mkfs.vfat -F 32 /dev/sda1
 mkfs.ext4 /dev/ArchLvm/root
-mkswap /dev//ArchLvm/swap
+mkswap /dev/ArchLvm/swap
 
 #Mount for install ArchLinux
 mount /dev/ArchLvm/root /mnt
@@ -97,7 +97,7 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "archlinux" > /etc/hostname
 
 #set hosts
-echo "127.0.0.1	localhost::1\n127.0.0.1		localhost\n127.0.0.1	archlinux.localdomain	archilinux" > /etc/hosts
+echo "127.0.0.1		localhost\n127.0.0.1	archlinux.localdomain	archilinux" > /etc/hosts
 
 #Set root Password
 passwd
@@ -224,4 +224,7 @@ open terminal Super+enter
 cd Music
 dlmp3 https://www.youtube.com/watch?v=Jpfevl5k7k4
 
-#All command Super+s
+#Show all command Super+s
+#poweroff launche rofi
+Super+p
+type poweroff
