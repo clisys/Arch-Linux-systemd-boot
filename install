@@ -268,16 +268,16 @@ Number  Start (sector)    End (sector)  Size       Code  Name
    sudo systemctl reboot
 
 #boot to Arch linux With lightdm and awesome wm
-#to download mp3
 #open terminal super+enter
 #open file manager super+/
 #open browser super+i
+#for download mp3
    Super+enter
    cd Music
    dlmp3 https://www.youtube.com/watch?v=Jpfevl5k7k4
 
 #Show all command Super+s
-#show all alias super+enter type alias
+#show all alias super+enter type alias {dlmp3 is my custom alias, musix for play ncmpcpp}
 #poweroff open rofi
    Super+p
    type poweroff
