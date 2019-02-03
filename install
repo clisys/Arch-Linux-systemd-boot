@@ -219,7 +219,44 @@ sudo systemctl enable apparmor.service
 #enable AppArmor as default security model on every boot set the following kernel parameters:
 nano /boot/loader/entries/arch.conf
 apparmor=1 security=apparmor
- 
+
+#Setup Uncomplicated Firewall
+sudo ufw status verbose
+sudo ufw disable
+
+   #and set the default rules to deny incoming and allow outgoing connections;
+      sudo ufw default deny incoming
+      sudo ufw default allow outgoing
+
+   #Disable remote ping
+      sudo nano /etc/ufw/before.rules
+         # ok icmp codes for INPUT
+         -A ufw-before-input -p icmp --icmp-type destination-unreachable -j DROP
+         -A ufw-before-input -p icmp --icmp-type time-exceeded -j DROP
+         -A ufw-before-input -p icmp --icmp-type parameter-problem -j DROP
+         -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
+
+   #Disable UFW logging
+      ufw logging off
+      
+      
+#Enable Ufw
+sudo ufw enable
+
+#setup dnscrypt-proxy
+sudo nano /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+listen_addresses = ['127.0.0.1:53']
+
+#setup resolv.conf
+sudo nano /etc/resolv.conf
+nameserver 127.0.0.1
+
+#make resolv.conf unchangeable by anyone on your system
+sudo chattr +i /etc/resolv.conf
+
+#enable dnscrypt-proxy
+sudo systemctl enable dnscrypt-proxy
+
 #reboot
 sudo systemctl reboot
 
