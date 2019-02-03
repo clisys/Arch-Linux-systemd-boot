@@ -51,7 +51,7 @@ alias dlmp3='youtube-dl --extract-audio --audio-format mp3'
 
 source $ZSH/oh-my-zsh.sh
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-neofetch
+neofetch | lolcat
 
 autoload -U promptinit; promptinit
 prompt spaceship
