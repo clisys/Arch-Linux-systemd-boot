@@ -197,6 +197,10 @@ cd Arch-Linux-systemd-boot
 mv .* ~/
 chmod +x screenshot && sudo mv screenshot /usr/local/bin
 
+#allow the MPD user to use PulseAudio
+sudo nano /etc/pulse/client.conf
+change the autospawn option to yes
+
 #Enable mpd service
 systemctl --user enable mpd.service
 
