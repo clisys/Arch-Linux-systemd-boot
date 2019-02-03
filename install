@@ -103,7 +103,8 @@ Number  Start (sector)    End (sector)  Size       Code  Name
    passwd
 
 #create user with sudo access
-   echo "\n%wheel ALL=(ALL) ALL\n" > /etc/sudoers
+   ## Uncomment to allow members of group wheel to execute any command
+   sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
    useradd -m -g wheel -s /usr/bin/zsh userarch
    passwd userarch
 
@@ -216,6 +217,17 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 #allow user to shutdown add alias to /etc/sudoers
    sudo nano /etc/sudoers
    userarch archlinux =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot
+ 
+   #This config is especially add to /etc/sudoers :
+   Defaults !requiretty, !tty_tickets, !umask
+   Defaults visiblepw, path_info, insults, lecture=always
+   Defaults loglinelen=0, logfile =/var/log/sudo.log, log_year, log_host, syslog=auth
+   Defaults passwd_tries=3, passwd_timeout=1
+   Defaults env_reset, always_set_home, set_home, set_logname
+   Defaults !env_editor, editor="/usr/bin/vim:/usr/bin/vi:/usr/bin/nano"
+   Defaults timestamp_timeout=15
+   Defaults passprompt="[sudo] password for %u: "
+   Defaults lecture=never
 
 #enable tlp apparmor service
    sudo systemctl enable tlp.service
