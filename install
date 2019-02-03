@@ -196,6 +196,7 @@ git clone https://github.com/localhostmacbook/Arch-Linux-systemd-boot.git
 cd Arch-Linux-systemd-boot
 mv .* ~/
 chmod +x screenshot && sudo mv screenshot /usr/local/bin
+sudo mv etc/X11/xorg.conf.d/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 #allow the MPD user to use PulseAudio
 sudo nano /etc/pulse/client.conf
