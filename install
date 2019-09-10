@@ -177,8 +177,8 @@ Number  Start (sector)    End (sector)  Size       Code  Name
    makepkg -si
 
 #install all my setup Awesome + lightdm 
-   wget https://raw.githubusercontent.com/localhostmacbook/Arch-Linux-systemd-boot/master/pkglist.txt
-   wget https://raw.githubusercontent.com/localhostmacbook/Arch-Linux-systemd-boot/master/aurpkglist.txt
+   wget https://raw.githubusercontent.com/clisys/Arch-Linux-systemd-boot/master/pkglist.txt
+   wget https://raw.githubusercontent.com/clisys/Arch-Linux-systemd-boot/master/aurpkglist.txt
 
    sudo pacman -S --needed $(comm -12 <(pacman -Slq|sort) <(sort pkglist.txt) )
    yay S --noedit --noconfirm --needed aurpkglist.txt
@@ -201,7 +201,7 @@ Number  Start (sector)    End (sector)  Size       Code  Name
    sudo systemctl enable lightdm.service
 
 #Dotfile Setup
-   git clone https://github.com/localhostmacbook/Arch-Linux-systemd-boot.git
+   git clone https://github.com/clisys/Arch-Linux-systemd-boot.git
    cd Arch-Linux-systemd-boot
    mv .* ~/
    chmod +x screenshot && sudo mv screenshot /usr/local/bin
